@@ -3,26 +3,33 @@ package internal
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 func worker[Result any](
 	filenameChan <-chan string,
 	outputChan chan<- Result,
 	doneChan chan<- bool,
-	f func(string) Result,
+	f func(string) (Result, error),
 ) {
 	// As long as filenameChan is open, read filename, call f,
 	// push result to the outputChan
 	for path := range filenameChan {
-		outputChan <- f(path)
+		data, err := f(path)
+		if err != nil {
+			log.Printf("%v: %v", path, err)
+		} else {
+			outputChan <- data
+		}
 	}
 	doneChan <- true
 }
 
 func Dispatcher[Result any](
-	workerFunc func(string) Result,
+	workerFunc func(string) (Result, error),
 	collectorFunc func(<-chan Result, chan<- string),
 	rootDir string,
 ) (string, error) {
@@ -44,7 +51,7 @@ func Dispatcher[Result any](
 			if err != nil {
 				return fmt.Errorf("Dispatcher: %w", err)
 			}
-			if !d.IsDir() {
+			if !d.IsDir() && strings.HasSuffix(p, ".jpg") {
 				filenameChan <- p
 			}
 			return nil
