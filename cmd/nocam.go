@@ -2,15 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"slices"
 	"strings"
 
-	"github.com/rwcarlsen/goexif/exif"
+	"github.com/kolesa-team/goexiv"
 	"github.com/spf13/cobra"
 
-	"github.com/av223119/go-ptool/internal"
+	"github.com/av223119/go-ptool/internal/dispatcher"
+	"github.com/av223119/go-ptool/internal/image"
 )
 
 func collector(input <-chan string, output chan<- string) {
@@ -26,32 +25,19 @@ func collector(input <-chan string, output chan<- string) {
 }
 
 func worker(p string) (string, error) {
-	f, err := os.Open(p)
+	exif, err := image.Exif(p)
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
-	// get exif
-	x, err := exif.Decode(f)
-	if err != nil {
-		// no exif at all
-		if err == io.EOF {
-			return p, nil
-		}
-		// report critical errors
-		if exif.IsCriticalError(err) {
-			return "", err
-		}
-		// ignore all the rest
-	}
+
 	// check make and model
-	for _, field := range []exif.FieldName{exif.Make, exif.Model} {
-		_, err = x.Get(field)
+	for _, field := range []string{"Exif.Image.Make", "Exif.Image.Model"} {
+		_, err := exif.GetString(field)
 		if err != nil {
-			if exif.IsTagNotPresentError(err) {
+			if err == goexiv.ErrMetadataKeyNotFound {
 				return p, nil
 			}
-			// ignore all other errors
+			return "", err
 		}
 	}
 	return "", nil
@@ -62,7 +48,7 @@ var nocamCmd = &cobra.Command{
 	Short: "Find files without camera maker/model data",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		txt, err := internal.Dispatcher(
+		txt, err := dispatcher.Run(
 			worker,
 			collector,
 			args[0],

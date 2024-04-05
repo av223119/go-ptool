@@ -1,4 +1,4 @@
-package internal
+package dispatcher
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func worker[Result any](
 	doneChan <- true
 }
 
-func Dispatcher[Result any](
+func Run[Result any](
 	workerFunc func(string) (Result, error),
 	collectorFunc func(<-chan Result, chan<- string),
 	rootDir string,
