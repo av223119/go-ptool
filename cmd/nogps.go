@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/kolesa-team/goexiv"
 	"github.com/spf13/cobra"
@@ -12,26 +10,14 @@ import (
 	"github.com/av223119/go-ptool/internal/image"
 )
 
-func list_collector(input <-chan string, output chan<- string) {
-	defer close(output)
-	res := []string{}
-	for s := range input {
-		if s != "" {
-			res = append(res, s)
-		}
-	}
-	slices.Sort(res)
-	output <- strings.Join(res, "\n")
-}
-
-func nocam_worker(p string) (string, error) {
+func nogps_worker(p string) (string, error) {
 	exif, err := image.Exif(p)
 	if err != nil {
 		return "", err
 	}
 
-	// check make and model
-	for _, field := range []string{"Exif.Image.Make", "Exif.Image.Model"} {
+	// check GPS tags
+	for _, field := range []string{"Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLongitude"} {
 		_, err := exif.GetString(field)
 		if err != nil {
 			if err == goexiv.ErrMetadataKeyNotFound {
@@ -43,13 +29,13 @@ func nocam_worker(p string) (string, error) {
 	return "", nil
 }
 
-var nocamCmd = &cobra.Command{
-	Use:   "nocam",
-	Short: "Find files without camera maker/model data",
+var nogpsCmd = &cobra.Command{
+	Use:   "nogps",
+	Short: "Find files without GPS data",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		txt, err := dispatcher.Run(
-			nocam_worker,
+			nogps_worker,
 			list_collector,
 			args[0],
 		)
@@ -59,5 +45,5 @@ var nocamCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(nocamCmd)
+	rootCmd.AddCommand(nogpsCmd)
 }
