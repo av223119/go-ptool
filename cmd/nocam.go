@@ -2,27 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/kolesa-team/goexiv"
 	"github.com/spf13/cobra"
 
+	"github.com/av223119/go-ptool/internal/collectors"
 	"github.com/av223119/go-ptool/internal/dispatcher"
 	"github.com/av223119/go-ptool/internal/image"
 )
-
-func list_collector(input <-chan string, output chan<- string) {
-	defer close(output)
-	res := []string{}
-	for s := range input {
-		if s != "" {
-			res = append(res, s)
-		}
-	}
-	slices.Sort(res)
-	output <- strings.Join(res, "\n")
-}
 
 func nocam_worker(p string) (string, error) {
 	exif, err := image.Exif(p)
@@ -50,7 +37,7 @@ var nocamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		txt, err := dispatcher.Run(
 			nocam_worker,
-			list_collector,
+			collectors.List_collector,
 			args[0],
 		)
 		cobra.CheckErr(err)

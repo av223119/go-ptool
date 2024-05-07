@@ -6,6 +6,7 @@ import (
 	"github.com/kolesa-team/goexiv"
 	"github.com/spf13/cobra"
 
+	"github.com/av223119/go-ptool/internal/collectors"
 	"github.com/av223119/go-ptool/internal/dispatcher"
 	"github.com/av223119/go-ptool/internal/image"
 )
@@ -36,7 +37,7 @@ var nogpsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		txt, err := dispatcher.Run(
 			nogps_worker,
-			list_collector,
+			collectors.List_collector,
 			args[0],
 		)
 		cobra.CheckErr(err)
