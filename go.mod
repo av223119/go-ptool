@@ -3,8 +3,8 @@ module github.com/av223119/go-ptool
 go 1.21.1
 
 require (
-	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/spf13/cobra v1.8.0
+	github.com/tajtiattila/metadata v0.0.0-20231113113956-31b820c695da
 )
 
 require (

@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"slices"
 	"strings"
 
-	"github.com/rwcarlsen/goexif/exif"
+	"github.com/tajtiattila/metadata/exif"
+	"github.com/tajtiattila/metadata/exif/exiftag"
 	"github.com/spf13/cobra"
 
 	"github.com/av223119/go-ptool/internal"
@@ -34,24 +34,13 @@ func worker(p string) (string, error) {
 	// get exif
 	x, err := exif.Decode(f)
 	if err != nil {
-		// no exif at all
-		if err == io.EOF {
-			return p, nil
-		}
-		// report critical errors
-		if exif.IsCriticalError(err) {
-			return "", err
-		}
-		// ignore all the rest
+		return "", nil
 	}
 	// check make and model
-	for _, field := range []exif.FieldName{exif.Make, exif.Model} {
-		_, err = x.Get(field)
-		if err != nil {
-			if exif.IsTagNotPresentError(err) {
-				return p, nil
-			}
-			// ignore all other errors
+	for _, tagname := range []uint32{exiftag.Make, exiftag.Model} {
+		t := x.Tag(tagname)
+		if !t.Valid() {
+			return p, nil
 		}
 	}
 	return "", nil
