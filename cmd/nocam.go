@@ -20,7 +20,7 @@ func nocamWorker(p string) (string, error) {
 	// get exif
 	x, err := exif.Decode(f)
 	if err != nil {
-		return "", nil
+		return p, nil
 	}
 	// check make and model
 	for _, tagname := range []uint32{exiftag.Make, exiftag.Model} {
