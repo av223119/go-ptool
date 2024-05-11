@@ -19,8 +19,13 @@ func nocamWorker(p string) (string, error) {
 	defer f.Close()
 	// get exif
 	x, err := exif.Decode(f)
-	if err != nil {
+	switch err {
+	case exif.NotFound:
 		return p, nil
+	case nil:
+		break
+	default:
+		return "", err
 	}
 	// check make and model
 	for _, tagname := range []uint32{exiftag.Make, exiftag.Model} {
