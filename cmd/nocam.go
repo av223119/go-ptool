@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"slices"
-	"strings"
 
 	"github.com/tajtiattila/metadata/exif"
 	"github.com/tajtiattila/metadata/exif/exiftag"
@@ -13,19 +11,7 @@ import (
 	"github.com/av223119/go-ptool/internal"
 )
 
-func collector(input <-chan string, output chan<- string) {
-	defer close(output)
-	res := []string{}
-	for s := range input {
-		if s != "" {
-			res = append(res, s)
-		}
-	}
-	slices.Sort(res)
-	output <- strings.Join(res, "\n")
-}
-
-func worker(p string) (string, error) {
+func nocamWorker(p string) (string, error) {
 	f, err := os.Open(p)
 	if err != nil {
 		return "", err
@@ -52,8 +38,8 @@ var nocamCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		txt, err := internal.Dispatcher(
-			worker,
-			collector,
+			nocamWorker,
+			listCollector,
 			args[0],
 		)
 		cobra.CheckErr(err)
