@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/tajtiattila/metadata/exif"
 	"github.com/tajtiattila/metadata/exif/exiftag"
@@ -11,30 +10,24 @@ import (
 	"github.com/av223119/go-ptool/internal"
 )
 
-func nocamWorker(p string) (string, error) {
-	f, err := os.Open(p)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	// get exif
-	x, err := exif.Decode(f)
+func nocamWorker(p string) (FileBool, error) {
+	x, err := internal.ParseFile(p)
 	switch err {
 	case exif.NotFound:
-		return p, nil
+		return FileBool{p, true}, nil
 	case nil:
 		break
 	default:
-		return "", err
+		return FileBool{p, false}, err
 	}
 	// check make and model
 	for _, tagname := range []uint32{exiftag.Make, exiftag.Model} {
 		t := x.Tag(tagname)
 		if !t.Valid() {
-			return p, nil
+			return FileBool{p, true}, nil
 		}
 	}
-	return "", nil
+	return FileBool{p, false}, nil
 }
 
 var nocamCmd = &cobra.Command{

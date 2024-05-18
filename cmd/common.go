@@ -5,16 +5,19 @@ import (
 	"strings"
 )
 
-func listCollector(input <-chan string, output chan<- string) {
+type FileBool struct {
+	Filename string
+	Result bool
+}
+
+func listCollector(input <-chan FileBool, output chan<- string) {
 	defer close(output)
 	res := []string{}
 	for s := range input {
-		if s != "" {
-			res = append(res, s)
+		if s.Result {
+			res = append(res, s.Filename)
 		}
 	}
 	slices.Sort(res)
 	output <- strings.Join(res, "\n")
 }
-
-
