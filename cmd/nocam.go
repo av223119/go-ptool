@@ -39,6 +39,7 @@ var nocamCmd = &cobra.Command{
 			nocamWorker,
 			listCollector,
 			args[0],
+			exclude,
 		)
 		cobra.CheckErr(err)
 		fmt.Println(txt)

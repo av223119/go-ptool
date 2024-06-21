@@ -17,6 +17,7 @@ var nogpsDirCmd = &cobra.Command{
 			nogpsWorker,
 			dirCollector,
 			args[0],
+			exclude,
 		)
 		cobra.CheckErr(err)
 		fmt.Println(txt)

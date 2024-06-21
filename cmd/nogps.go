@@ -48,6 +48,7 @@ var nogpsCmd = &cobra.Command{
 			nogpsWorker,
 			listCollector,
 			args[0],
+			exclude,
 		)
 		cobra.CheckErr(err)
 		fmt.Println(txt)

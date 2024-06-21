@@ -32,6 +32,7 @@ func Dispatcher[Result any](
 	workerFunc func(string) (Result, error),
 	collectorFunc func(<-chan Result, chan<- string),
 	rootDir string,
+	excludes []string,
 ) (string, error) {
 	filenameChan := make(chan string)
 	resultChan := make(chan Result)
@@ -46,12 +47,18 @@ func Dispatcher[Result any](
 	go collectorFunc(resultChan, textOut)
 
 	// walk the tree rooted at rootDir
-	err := filepath.WalkDir(rootDir,
+	err := filepath.WalkDir(
+		rootDir,
 		func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return fmt.Errorf("Dispatcher: %w", err)
 			}
 			if !d.IsDir() && strings.HasSuffix(p, ".jpg") {
+				for _, excl := range excludes {
+					if strings.Contains(p, excl) {
+						return nil
+					}
+				}
 				filenameChan <- p
 			}
 			return nil

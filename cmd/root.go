@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exclude []string
+
 var rootCmd = &cobra.Command{
 	Use:               "go-ptool",
 	Short:             "A collection of useful photo collection helpers",
@@ -30,7 +32,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.go-ptool.yaml)")
+	rootCmd.PersistentFlags().StringArrayVarP(&exclude, "exclude", "x", []string{}, "patterns to exclude")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
