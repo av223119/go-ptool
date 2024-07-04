@@ -64,6 +64,7 @@ func camsCollector(input <-chan MakerModel, output chan<- string) {
 		for m := range res[ma] {
 			mos = append(mos, m)
 		}
+		sort.Strings(mos)
 		for _, mo := range mos {
 			fmt.Fprintf(&out, "%25s | %40s | %d\n", ma, mo, res[ma][mo])
 		}
