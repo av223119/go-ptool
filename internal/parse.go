@@ -3,7 +3,8 @@ package internal
 import (
 	"os"
 
-	"github.com/tajtiattila/metadata/exif"
+	"github.com/evanoberholster/imagemeta"
+	"github.com/evanoberholster/imagemeta/meta/exif"
 )
 
 func ParseFile(p string) (*exif.Exif, error) {
@@ -12,5 +13,12 @@ func ParseFile(p string) (*exif.Exif, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return exif.Decode(f)
+
+	ex, err := imagemeta.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ex, nil
+
 }

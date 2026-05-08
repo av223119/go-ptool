@@ -41,7 +41,7 @@ func Dispatcher[Result any](
 	nWorkers := runtime.NumCPU()
 
 	// spawn N workers and one collector
-	for i := 0; i < nWorkers; i++ {
+	for range nWorkers {
 		go worker(filenameChan, resultChan, doneChan, workerFunc)
 	}
 	go collectorFunc(resultChan, textOut)
@@ -53,20 +53,22 @@ func Dispatcher[Result any](
 			if err != nil {
 				return fmt.Errorf("Dispatcher: %w", err)
 			}
-			if !d.IsDir() && strings.HasSuffix(p, ".jpg") {
-				for _, excl := range excludes {
-					if strings.Contains(p, excl) {
-						return nil
+			if !d.IsDir() {
+				if strings.HasSuffix(p, ".jpg") || strings.HasSuffix(p, ".heic") {
+					for _, excl := range excludes {
+						if strings.Contains(p, excl) {
+							return nil
+						}
 					}
+					filenameChan <- p
 				}
-				filenameChan <- p
 			}
 			return nil
 		})
 
 	// Close filenameChan, wait for all workers to finish
 	close(filenameChan)
-	for i := 0; i < nWorkers; i++ {
+	for range nWorkers {
 		<-doneChan
 	}
 

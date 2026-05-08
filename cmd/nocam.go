@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/tajtiattila/metadata/exif"
-	"github.com/tajtiattila/metadata/exif/exiftag"
 	"github.com/spf13/cobra"
 
 	"github.com/av223119/go-ptool/internal"
@@ -12,20 +11,15 @@ import (
 
 func nocamWorker(p string) (FileBool, error) {
 	x, err := internal.ParseFile(p)
-	switch err {
-	case exif.NotFound:
-		return FileBool{p, true}, nil
-	case nil:
-		break
-	default:
+	if err != nil {
+		log.Fatalln(err)
 		return FileBool{p, false}, err
 	}
-	// check make and model
-	for _, tagname := range []uint32{exiftag.Make, exiftag.Model} {
-		t := x.Tag(tagname)
-		if !t.Valid() {
-			return FileBool{p, true}, nil
-		}
+	if x.IFD0.Make == "" {
+		return FileBool{p, true}, nil
+	}
+	if x.IFD0.Model == "" {
+		return FileBool{p, true}, nil
 	}
 	return FileBool{p, false}, nil
 }

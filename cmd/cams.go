@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/tajtiattila/metadata/exif"
-	"github.com/tajtiattila/metadata/exif/exiftag"
 
 	"github.com/av223119/go-ptool/internal"
 )
@@ -17,30 +16,13 @@ type MakerModel struct {
 	Model string
 }
 
-func mytrim (s string) string {
-	return strings.Trim(strings.TrimSpace(s), "\x00")
-}
-
 func camsWorker(p string) (MakerModel, error) {
 	x, err := internal.ParseFile(p)
-	switch err {
-	case exif.NotFound:
-		return MakerModel{"-", "-"}, nil
-	case nil:
-		break
-	default:
+	if err != nil {
+		log.Fatalln(err)
 		return MakerModel{"-", "-"}, err
 	}
-	ma, mo := "-", "-"
-	t := x.Tag(exiftag.Make)
-	if t.Valid() {
-		ma, _ = t.Ascii()
-	}
-	t = x.Tag(exiftag.Model)
-	if t.Valid() {
-		mo, _ = t.Ascii()
-	}
-	return MakerModel{mytrim(ma), mytrim(mo)}, nil
+	return MakerModel{x.IFD0.Make, x.IFD0.Model}, nil
 }
 
 func camsCollector(input <-chan MakerModel, output chan<- string) {
