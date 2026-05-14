@@ -21,22 +21,21 @@ func nogpsWorker(p string) (FileBool, error) {
 	return FileBool{p, false}, nil
 }
 
-var nogpsCmd = &cobra.Command{
-	Use:   "nogps",
-	Short: "Find files without GPS data",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		txt, err := internal.Dispatcher(
-			nogpsWorker,
-			listCollector,
-			args[0],
-			exclude,
-		)
-		cobra.CheckErr(err)
-		fmt.Println(txt)
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(nogpsCmd)
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "nogps",
+		Short: "Find files without GPS data",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			txt, err := internal.Dispatcher(
+				isImage,
+				nogpsWorker,
+				listCollector,
+				args[0],
+				exclude,
+			)
+			cobra.CheckErr(err)
+			fmt.Println(txt)
+		},
+	})
 }

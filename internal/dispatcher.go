@@ -29,6 +29,7 @@ func worker[Result any](
 }
 
 func Dispatcher[Result any](
+	filterFunc func(string) bool,
 	workerFunc func(string) (Result, error),
 	collectorFunc func(<-chan Result, chan<- string),
 	rootDir string,
@@ -54,7 +55,7 @@ func Dispatcher[Result any](
 				return fmt.Errorf("Dispatcher: %w", err)
 			}
 			if !d.IsDir() {
-				if strings.HasSuffix(p, ".jpg") || strings.HasSuffix(p, ".heic") {
+				if filterFunc(p) {
 					for _, excl := range excludes {
 						if strings.Contains(p, excl) {
 							return nil

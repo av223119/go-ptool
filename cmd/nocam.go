@@ -24,22 +24,21 @@ func nocamWorker(p string) (FileBool, error) {
 	return FileBool{p, false}, nil
 }
 
-var nocamCmd = &cobra.Command{
-	Use:   "nocam",
-	Short: "Find files without camera maker/model data",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		txt, err := internal.Dispatcher(
-			nocamWorker,
-			listCollector,
-			args[0],
-			exclude,
-		)
-		cobra.CheckErr(err)
-		fmt.Println(txt)
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(nocamCmd)
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "nocam",
+		Short: "Find files without camera maker/model data",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			txt, err := internal.Dispatcher(
+				isImage,
+				nocamWorker,
+				listCollector,
+				args[0],
+				exclude,
+			)
+			cobra.CheckErr(err)
+			fmt.Println(txt)
+		},
+	})
 }
