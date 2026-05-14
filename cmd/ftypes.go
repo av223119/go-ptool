@@ -9,20 +9,20 @@ import (
 	"github.com/av223119/go-ptool/internal"
 )
 
-func ftypeWorker(p string) (string, error) {
+func ftypesWorker(p string) (string, error) {
 	s := strings.Split(p, ".")
 	return s[len(s)-1], nil
 }
 
 func init() {
 	rootCmd.AddCommand(&cobra.Command{
-		Use:   "filetype",
+		Use:   "ftypes",
 		Short: "Overall filetype statistics",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			txt, err := internal.Dispatcher(
 				anyFile,
-				ftypeWorker,
+				ftypesWorker,
 				tableCollector,
 				args[0],
 				exclude,

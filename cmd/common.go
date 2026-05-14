@@ -62,7 +62,7 @@ func tableCollector(input <-chan string, output chan<- string) {
 	sort.Slice(keys, func(i, j int) bool { return res[keys[i]] < res[keys[j]] })
 	table := make([]string, len(res))
 	for i, k := range keys {
-		table[i] = fmt.Sprintf("%10v | %10v", k, res[k])
+		table[i] = fmt.Sprintf("%20v | %10v", k, res[k])
 	}
 	output <- strings.Join(table, "\n")
 }
