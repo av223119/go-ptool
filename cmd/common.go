@@ -83,3 +83,7 @@ func dirCollector(input <-chan FileBool, output chan<- string) {
 func isImage(p string) bool {
 	return strings.HasSuffix(p, ".jpg") || strings.HasSuffix(p, ".heic")
 }
+
+func anyFile(p string) bool {
+	return true
+}
