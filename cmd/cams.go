@@ -61,7 +61,7 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			txt, err := internal.Dispatcher(
-				isImage,
+				imageFile,
 				camsWorker,
 				camsCollector,
 				args[0],

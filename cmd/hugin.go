@@ -3,34 +3,35 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/av223119/go-ptool/internal"
 )
 
-func nogpsWorker(p string) (FileBool, error) {
+func huginWorker(p string) (KVPair, error) {
 	x, err := internal.ParseFile(p)
 	if err != nil {
 		log.Fatalln(err)
-		return FileBool{p, false}, err
+		return KVPair{}, err
 	}
-	if x.GPS.Latitude() == 0 && x.GPS.Longitude() == 0 {
-		return FileBool{p, true}, nil
+	if strings.Contains(x.IFD0.Software, "Hugin") {
+		return KVPair{p, x.IFD0.Software}, nil
 	}
-	return FileBool{p, false}, nil
+	return KVPair{}, nil
 }
 
 func init() {
 	rootCmd.AddCommand(&cobra.Command{
-		Use:   "nogps",
-		Short: "Find files without GPS data",
+		Use:   "hugin",
+		Short: "Files edited by Hugin",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			txt, err := internal.Dispatcher(
 				imageFile,
-				nogpsWorker,
-				listCollector,
+				huginWorker,
+				kvListCollector,
 				args[0],
 				exclude,
 			)

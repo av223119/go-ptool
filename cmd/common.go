@@ -12,6 +12,20 @@ type FileBool struct {
 	Result   bool
 }
 
+type KVPair struct {
+	Filename string
+	Value    string
+}
+
+func rightmost(s string, n int) string {
+	r := []rune(s)
+	l := len(r)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[max(0, l-n):])
+}
+
 type boolCounter map[bool]uint
 type mapCounter map[string]boolCounter
 
@@ -44,15 +58,34 @@ func listCollector(input <-chan FileBool, output chan<- string) {
 	output <- strings.Join(res, "\n")
 }
 
-func tableCollector(input <-chan string, output chan<- string) {
+func kvListCollector(input <-chan KVPair, output chan<- string) {
+	defer close(output)
+	res := []KVPair{}
+	for s := range input {
+		if s.Filename != "" {
+			res = append(res, s)
+		}
+	}
+	sort.Slice(res, func(i, j int) bool { return res[i].Filename < res[j].Filename })
+	strs := make([]string, len(res))
+	for i, v := range res {
+		strs[i] = fmt.Sprintf("%60v | %v", rightmost(v.Filename, 60), v.Value)
+	}
+	output <- strings.Join(strs, "\n")
+}
+
+func countCollector(input <-chan string, output chan<- string) {
 	defer close(output)
 	res := map[string]int{}
 	for s := range input {
+		if s == "" {
+			continue
+		}
 		v, ok := res[s]
 		if !ok {
 			res[s] = 1
 		} else {
-			res[s] = v+1
+			res[s] = v + 1
 		}
 	}
 	keys := make([]string, 0, len(res))
@@ -80,7 +113,7 @@ func dirCollector(input <-chan FileBool, output chan<- string) {
 	output <- res.String()
 }
 
-func isImage(p string) bool {
+func imageFile(p string) bool {
 	return strings.HasSuffix(p, ".jpg") || strings.HasSuffix(p, ".heic")
 }
 

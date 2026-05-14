@@ -23,7 +23,7 @@ func init() {
 			txt, err := internal.Dispatcher(
 				anyFile,
 				ftypesWorker,
-				tableCollector,
+				countCollector,
 				args[0],
 				exclude,
 			)
