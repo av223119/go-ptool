@@ -5,6 +5,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 type FileBool struct {
@@ -77,6 +78,7 @@ func kvListCollector(input <-chan KVPair, output chan<- string) {
 func countCollector(input <-chan string, output chan<- string) {
 	defer close(output)
 	res := map[string]int{}
+	maxl := 0
 	for s := range input {
 		if s == "" {
 			continue
@@ -90,12 +92,14 @@ func countCollector(input <-chan string, output chan<- string) {
 	}
 	keys := make([]string, 0, len(res))
 	for k := range res {
+		maxl = max(maxl, utf8.RuneCountInString(k))
 		keys = append(keys, k)
 	}
 	sort.Slice(keys, func(i, j int) bool { return res[keys[i]] < res[keys[j]] })
 	table := make([]string, len(res))
+	output_f := fmt.Sprintf("%%%dv | %%-10v", maxl)
 	for i, k := range keys {
-		table[i] = fmt.Sprintf("%20v | %10v", k, res[k])
+		table[i] = fmt.Sprintf(output_f, k, res[k])
 	}
 	output <- strings.Join(table, "\n")
 }
