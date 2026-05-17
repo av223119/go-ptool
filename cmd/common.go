@@ -24,7 +24,7 @@ func rightmost(s string, n int) string {
 	if len(r) <= n {
 		return s
 	}
-	return string(r[max(0, l-n):])
+	return fmt.Sprintf("%v%v", "…", string(r[max(0, l-n):]))
 }
 
 type boolCounter map[bool]uint
@@ -70,7 +70,7 @@ func kvListCollector(input <-chan KVPair, output chan<- string) {
 	sort.Slice(res, func(i, j int) bool { return res[i].Filename < res[j].Filename })
 	strs := make([]string, len(res))
 	for i, v := range res {
-		strs[i] = fmt.Sprintf("%60v | %v", rightmost(v.Filename, 60), v.Value)
+		strs[i] = fmt.Sprintf("%60v | %v", rightmost(v.Filename, 59), v.Value)
 	}
 	output <- strings.Join(strs, "\n")
 }
